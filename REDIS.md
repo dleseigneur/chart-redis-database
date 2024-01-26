@@ -1,5 +1,5 @@
 # Bonne pratiques
-Pour le moment les clusters redis sont sur des plans petit.
+Pour le moment les clusters redis sont sur des plans petit 15Go par pod du cluster REC.
 Cela évoluera en fonction des besoins.
 
 Les conditions d'ajout de shard :

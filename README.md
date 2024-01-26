@@ -16,7 +16,7 @@ Mettre à jour `les versions et modules`` dans le fichier [redis-enterprise-data
 |-----|------|---------|-------------|
 | databaseName | string | `"testredb"` | The name of the database to use. |
 | databasePort | number | `"none"` | [Choisir un port entre 10000 à 19999.](https://docs.redis.com/latest/kubernetes/reference/db-options/) |
-| memorySize | string | `"128MB"` | The size of the database MB, GB. Default 128MB |
+| memorySize | string | `"128MB"` | The size of the database MB, GB. Default 128MB <br>[Explain calcul memory](./images/calclumemory.png) |
 | redisVersion | string | `"latest"` | [Version de ma database 2 choix `major ou latest`](https://docs.redis.com/latest/kubernetes/reference/db-options/)|
 | replication | bool | `"false"` | [aide au choix](./REDIS.md)|
 | shardCount | number | `1` | [aide au choix](./REDIS.md)  |
