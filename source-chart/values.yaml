@@ -1,0 +1,47 @@
+# https://docs.redis.com/latest/kubernetes/reference/db-options/
+# nom de la database
+databaseName: test
+# Network port configuration range 10000-19999 
+# https://docs.redis.com/latest/rs/networking/port-configurations/
+# databasePort: 10254
+# taille de la database, par défaut 64MB
+# choix de l'unité, MB, GB
+memorySize: 128MB
+# vesion database redis, par défaut latest
+redisVersion: "latest"
+# replication par défaut false
+replication: false
+# nombre de shard minimum pour un cluster redis database.
+# paramètre par défaut 1
+shardCount: 1
+# Persitence de la donnée par défaut aofEverySecond
+# https://docs.redis.com/latest/rs/databases/configure/database-persistence/
+persistence: aofEverySecond
+# par défaut redis génére un password automatique
+# kubectl get secret redb-mydb -o jsonpath="{.data.password}" | base64 --decode
+# pour fixer un password mettre auth.enabled=true et mettre un password sécurisé.
+auth:
+  enabled: false
+  password: test
+# feature en cours de création
+# Ne pas l'activer pour le moment
+backup:
+  enabled: false
+# nom du host sur le port 443
+# exemple avec le cluster k8s dns wildcard :
+# DNSWILDCARCLUSTERK8S = example.com
+ingressTCP:
+  enabled: false
+  host: redb-access-tcp.example.com
+# modules disponibles : ci-dessous partie modulesList
+# https://docs.redis.com/latest/stack/install/add-module-to-database/
+# possibilité de mettre un ou n modules
+modules:
+  enabled: false
+  modulesList:
+    # - ReJSON        # module RedisJSON
+    # - search        # module RediSearch 2
+    # - bf            # module RedisBloom
+    # - graph         # module RedisGraph
+    # - redisgears_2  # module RedisGears
+    # - timeseries    # module RedisTimeSeries

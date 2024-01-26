@@ -1,0 +1,40 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: redb-role
+  namespace: {{ .Release.Namespace | quote }}  
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-3"
+rules:
+  - apiGroups:
+      - app.redislabs.com
+    resources: ["redisenterpriseclusters", "redisenterpriseclusters/status", "redisenterpriseclusters/finalizers",
+                "redisenterprisedatabases", "redisenterprisedatabases/status", "redisenterprisedatabases/finalizers",
+                "redisenterpriseremoteclusters", "redisenterpriseremoteclusters/status",
+                "redisenterpriseremoteclusters/finalizers",
+                "redisenterpriseactiveactivedatabases", "redisenterpriseactiveactivedatabases/status",
+                "redisenterpriseactiveactivedatabases/finalizers"]
+    verbs: ["delete", "deletecollection", "get", "list", "patch", "create", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["update", "get", "read", "list", "listallnamespaces", "watch", "watchlist",
+            "watchlistallnamespaces", "create","patch","replace","delete","deletecollection"]
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "watch", "list", "update", "patch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    resourceNames: [{{ .Release.Namespace }}]
+    verbs: ["get", "patch"]

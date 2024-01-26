@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Namespace }}:redb-delete
+  namespace: {{ .Release.Namespace | quote }} 
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-8"
+subjects:
+  - kind: ServiceAccount
+    name: redb
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: redb-delete
+  apiGroup: rbac.authorization.k8s.io

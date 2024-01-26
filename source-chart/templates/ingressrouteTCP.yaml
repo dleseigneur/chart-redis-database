@@ -1,0 +1,24 @@
+{{- if and .Values.ingressTCP.enabled -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: redb-external-access
+  namespace: {{ .Release.Namespace | quote }}   
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "8"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: HostSNI(`{{ .Values.ingressTCP.host }}`)
+      services:
+        - name: {{ .Values.databaseName }}
+          port: 443
+  tls: {}
+{{- end }}    

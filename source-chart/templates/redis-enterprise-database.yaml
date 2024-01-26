@@ -1,0 +1,78 @@
+apiVersion: app.redislabs.com/v1alpha1
+kind: RedisEnterpriseDatabase
+metadata:
+  name: "{{ .Values.databaseName }}"
+  namespace: {{ .Release.Namespace | quote }}   
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "3"
+spec:
+  redisEnterpriseCluster:
+    name: redis-cluster
+  memorySize: {{ default "128MB" .Values.memorySize }}
+  redisVersion: {{ default "latest" .Values.redisVersion }}
+  replication: {{ default false .Values.replication }}
+  shardCount: {{ default 1 .Values.shardCount }}
+  {{- if and .Values.auth.enabled }}
+  databaseSecretName: secret-db
+  {{- end }}
+  # Check port available in port range
+  {{- if .Values.databasePort }}
+  {{- $existingPorts := list }}
+  {{- range $db := (lookup "app.redislabs.com/v1alpha1" "RedisEnterpriseDatabase" "" "").items }}
+    {{- with index $db.status.internalEndpoints 0 }}
+      {{- $value := .port | int }}
+      {{- $existingPorts = append $existingPorts $value }}
+    {{- end }}
+  {{- end }}
+  {{- if not (regexMatch "^1[0-9]{4}$" (.Values.databasePort|toString))}}
+    {{- fail "Invalid port. Please provide a port within the range 10000 to 19999." }}
+  {{- else}}
+    {{- if has (.Values.databasePort|int) $existingPorts }}
+      {{- fail (printf "Port %s is already in use. Please choose a different port." (.Values.databasePort|toString)) }}
+    {{- else}}
+  databasePort: {{ .Values.databasePort }}
+    {{- end }}
+  {{- end }}  
+  {{- end }}   
+  {{- if and .Values.backup.enabled }}
+  backup:
+    interval: 3600
+    s3:
+      awsSecretName: secret-s3
+      bucketName: test
+      subdir: test
+  {{- end }}
+  # https://docs.redis.com/latest/rs/databases/configure/database-persistence/
+  persistence: {{ default "aofEverySecond" .Values.persistence }}
+{{- if and .Values.modules.enabled }}
+  {{- with .Values.modules.modulesList }}
+  modulesList:
+    {{- range $module := . }}
+  - name: {{ $module }}
+    {{- if eq "bf" $module }}
+    version: 2.6.3
+    {{- end }}
+    {{- if eq "graph" $module }}
+    version: 2.10.12
+    {{- end }}
+    {{- if eq "redisgears_2" $module }}
+    version: 2.0.11
+    {{- end }}
+    {{- if eq "ReJSON" $module }}
+    version: 2.6.6
+    {{- end }}
+    {{- if eq "search" $module }}
+    version: 2.8.4
+    {{- end }}
+    {{- if eq "timeseries" $module }}
+    version: 1.10.4
+    {{- end }}        
+  {{- end }}     
+  {{- end }} 
+{{- end }}  
